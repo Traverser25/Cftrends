@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Bar</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        /* Styles for wrapping the search box */
+        .main {
+            width: 90%;
+            margin: 50px auto;
+        }
+
+        /* Bootstrap 4 text input with search icon */
+        .has-search .form-control {
+            padding-left: 2.5rem;
+            /* Adjusted padding */
+            width: 100%;
+        }
+
+        .has-search .form-control-feedback {
+            position: absolute;
+            z-index: 2;
+            display: block;
+            width: 2.375rem;
+            height: 2.375rem;
+            line-height: 2.375rem;
+            text-align: center;
+            pointer-events: none;
+            color: #aaa;
+        }
+
+        /* Align text in table cells */
+        th,
+        td {
+            text-align: center;
+        }
+
+        /* Rounded corners for the table */
+        .rounded-table {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .red-letter,
+        .blue-letter {
+            letter-spacing: -0.20em; /* Adjust the value as needed */
+        }
+
+        .red-letter {
+            color: red;
+        }
+
+        .blue-letter {
+            color: blue;
+        }
+
+        /* Visitor counter box style */
+        .visitor-counter {
+            background-color: black;
+            color: white;
+            width: 90px;
+            height: 70px;
+            border-radius: 30px;
+            padding: 10px;
+            margin-top: 5px;
+            float: right;
+            text-align: center;
+            font-size: smaller;
+            margin-left: 25px;
+            margin-top: 20px;
+            /* Use smaller font size */
+        }
+  
+    </style>
+</head>
+<body>
+    <div class="main">
+        <h1>
+            <!-- Styled CFtrends text -->
+            <span class="red-letter">C</span>
+            <span class="red-letter">F</span>
+            <span class="blue-letter">t</span>
+            <span class="blue-letter">r</span>
+            <span class="blue-letter">e</span>
+            <span class="blue-letter">n</span>
+            <span class="blue-letter">d</span>
+            <span class="blue-letter">s</span>
+        </h1>
+        <!-- Visitor counter box -->
+        <div class="visitor-counter">
+            <p>Visit Count</p>
+            <p id="visitCount">Loading...</p>
+        </div>
+        <!-- Search form -->
+        <br>
+        <form class="d-flex">
+            <input id="ratingInput" class="form-control me-2" type="search" placeholder="Enter Rating...."
+                aria-label="Search">
+            <button id="searchBtn" class="btn btn-outline-success" type="button">Search</button>
+        </form>
+
+        <br>
+        <!-- Table of problems -->
+        <table id="problemTable" class="table table-dark mt-5 light-green-row rounded-table">
+            <thead>
+                <tr class="light-green-row1">
+                    <th scope="col">Sr no.</th>
+                    <th scope="col">Problem Name</th>
+                    <th scope="col">Rating</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Function to fetch problems based on the provided rating
+        function fetchProblemsByRating(rating) {
+            fetch(`https://localhost:5000/problems/${rating}`)
+                .then(response => response.json())
+                .then(data => {
+                    var tbody = document.querySelector('#problemTable tbody');
+                    tbody.innerHTML = '';
+                    data.forEach(function (problem, index) {
+                        var row = `
+                            <tr>
+                                <th scope="row">${index + 1}</th>
+                                <td><a href="${problem.link}" target="_blank">${problem.probName}</a></td>
+                                <td>${problem.rating}</td>
+                            </tr>
+                        `;
+                        tbody.innerHTML += row;
+                    });
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        }
+
+        // Function to fetch visit count from API and update the DOM
+        function fetchVisitCountAndUpdate() {
+            fetch('https://localhost:5000/getVisit')
+                .then(response => response.json())
+                .then(data => {
+                    var visitCountElement = document.getElementById('visitCount');
+                    var count = data.count;
+                    visitCountElement.textContent = count;
+                })
+                .catch(error => console.error('Error fetching visit count:', error));
+        }
+
+        // Function to fetch problems with a default rating of 800 when the page loads
+        function fetchDefaultProblems() {
+            fetchProblemsByRating(800);
+            fetchVisitCountAndUpdate(); // Fetch visit count when the page loads
+        }
+
+        // Function to handle search button click
+        function handleSearch() {
+            var rating = document.getElementById('ratingInput').value;
+            fetchProblemsByRating(rating);
+        }
+
+        // Call fetchDefaultProblems function when the document is fully loaded
+        document.addEventListener('DOMContentLoaded', fetchDefaultProblems);
+
+        // Attach handleSearch function to the search button click event
+        document.getElementById('searchBtn').addEventListener('click', handleSearch);
+    </script>
+</body>
+</html>
